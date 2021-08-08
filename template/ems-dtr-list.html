@@ -1,0 +1,44 @@
+{% extends 'base-template.html' %}
+{% block title %}DTR List{% endblock %}
+
+{% block body %}
+
+<div id="app">
+    <div class="nav border py-2 px-4 mb-4">
+        <a href="/ems-dtr/"> Go to DTR</a>
+    </div>
+
+    <div class="container">
+        <div>
+            <select class="form-control">
+                <option value="" disabled selected>Select User</option>
+            </select>
+        </div>
+
+        <div class="my-3">
+            <table class="table">
+                <thead>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Jan. 09, 2020</td>
+                        <td>8:00 AM</td>
+                        <td>5:00 PM</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+
+
+{% endblock %}

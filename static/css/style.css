@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+
 
 :root{
     --imps-blue-text: #339de9;
@@ -9,6 +11,64 @@
 
 [v-cloak] { display:none; }
 
+html,body
+{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden; 
+}
+
+@media only screen and (max-width: 766px) {
+    .qr-scanner{
+        width: 95vw;
+        height: 53.437vw;
+        background-color: #eaeaea;
+    }
+
+    .d-xs-flex{
+        display: flex;
+        padding: 0;
+        flex-wrap: nowrap;
+        flex-flow: row wrap;
+        flex:none;
+    }
+
+    .vw100{
+        width: 100vw;
+    }
+    
+    .vw95{
+        width: 95vw;
+    }
+
+    .res-none{
+        display: none;
+    }
+
+    .dtr-creds{
+        background-color: #eaeaea;
+        height: auto;
+        width: 95vw;
+    }
+}
+
+@media only screen and (min-width: 767px){
+    .qr-scanner{
+        height: 288px; width: 512px; background-color: #eaeaea;
+    }
+
+    .dtr-creds{
+        background-color: #eaeaea;
+        height: auto;
+        width: 512px;
+    }
+}
+
+.line-height-100{
+    line-height: 100%;
+}
 .form-container .form-container-1{
     background: white;
     border-radius: 15px;
@@ -19,6 +79,10 @@
 
 .form-container{
     width: 350px;
+}
+
+.oswald{
+    font-family: 'Oswald', sans-serif;
 }
 
 body{
@@ -53,6 +117,14 @@ body{
     font-size: 14px !important;
 }
 
+.font-size-15{
+    font-size: 15px !important;
+}
+
+.font-size-16{
+    font-size: 16px !important;
+}
+
 .font-size-18{
     font-size: 18px !important;
 }
@@ -71,6 +143,46 @@ body{
 
 .font-size-40{
     font-size: 40px !important;
+}
+
+.font-size-42{
+    font-size: 42px !important;
+}
+
+.font-size-44{
+    font-size: 44px !important;
+}
+
+.font-size-46{
+    font-size: 46px !important;
+}
+
+.font-size-48{
+    font-size: 48px !important
+}
+
+.font-size-50{
+    font-size: 50px !important
+}
+
+.font-size-52{
+    font-size: 52px !important;
+}
+
+.font-size-54{
+    font-size: 54px !important;
+}
+
+.font-size-56{
+    font-size: 56px !important;
+}
+
+.font-size-58{
+    font-size: 58px !important;
+}
+
+.font-size-60{
+    font-size: 60px !important;
 }
 
 .font-size-64{
@@ -881,4 +993,11 @@ select.form-control{
 
 .voided{
     background-color: rgb(255, 236, 236) !important;
+}
+
+.text-blue-green{
+    background: linear-gradient(90deg, #3bb4f5, #46FF05);
+    background-repeat: repeat;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

@@ -1,12 +1,17 @@
 from django.contrib import admin
-from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
-from django.contrib.staticfiles.urls import urlpatterns
 from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from . import views
 from rest_framework import routers
-from rest_framework.urlpatterns import format_suffix_patterns
+
+router = routers.DefaultRouter()
 
 urlpatterns = [
-    
+
+    path('api/', include(router.urls)),
+    path('ems-dtr/', views.DTRView.as_view()),
+    path('ems-list/', views.DTRList.as_view()),
+    path('ems-dtr-process/', views.DTRProcess.as_view())
 ]

@@ -1,1 +1,1 @@
-from dtr import *
+from .dtr import *
