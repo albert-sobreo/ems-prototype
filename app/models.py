@@ -33,8 +33,30 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+dayOff = [
+    (0, 'SUN'),
+    (1, 'MON'),
+    (2, 'TUE'),
+    (3, 'WED'),
+    (4, 'THU'),
+    (5, 'FRI'),
+    (6, 'SAT')
+]
+
+class Schedule(models.Model):
+    timeIn = models.TimeField()
+    timeOut = models.TimeField()
+
+class DayOff(models.Model):
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, null=True, blank=True)
+    day = models.IntegerField(choices=dayOff, null=True, blank=True)
+
 class DTR(models.Model):
     dateTimeIn = models.DateTimeField( null = True, blank = True)
     dateTimeOut = models.DateTimeField( null = True, blank = True)
     date = models.DateField( null = True, blank = True)
     user = models.ForeignKey(User, related_name = "dtr", on_delete=models.PROTECT, null = True, blank = True)
+
+    rh = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    ot = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    ut = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)

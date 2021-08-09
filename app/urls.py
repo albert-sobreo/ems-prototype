@@ -8,6 +8,9 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 
+########## USER WITH DTR ##########
+router.register(r'user-w-dtr', views.UserWithDTRAPI, 'user-w-dtr')
+
 urlpatterns = [
 
     path('api/', include(router.urls)),

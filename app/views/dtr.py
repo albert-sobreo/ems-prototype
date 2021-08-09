@@ -12,7 +12,10 @@ from rest_framework.permissions import IsAuthenticated
 
 class DTRList(View):
     def get(self, request, format=None):
-        return render(request, 'ems-dtr-list.html')
+        context = {
+            'User': User.objects.all()
+        }
+        return render(request, 'ems-dtr-list.html', context)
 
 class DTRView(View):
     def get(self, request, format=None):
