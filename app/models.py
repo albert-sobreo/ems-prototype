@@ -9,6 +9,13 @@ from django.db.models.deletion import PROTECT
 
 # Create your models here.
 
+class Schedule(models.Model):
+    timeIn = models.TimeField()
+    timeOut = models.TimeField()\
+        
+    def __str__(self):
+        return str(self.timeIn) + " - " + str(self.timeOut)
+    
 class User(AbstractUser):
     authLevel = models.CharField(max_length=50, null = True, blank = True)
     position = models.CharField(max_length=20, null = True, blank = True)
@@ -25,6 +32,7 @@ class User(AbstractUser):
     dateResigned = models.DateField(null = True, blank = True)
     department = models.CharField(max_length=50, null = True, blank = True)
     mobile = models.CharField(max_length=15, null = True, blank = True)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = "User"
@@ -43,13 +51,12 @@ dayOff = [
     (6, 'SAT')
 ]
 
-class Schedule(models.Model):
-    timeIn = models.TimeField()
-    timeOut = models.TimeField()
-
 class DayOff(models.Model):
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, null=True, blank=True)
     day = models.IntegerField(choices=dayOff, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.day)
 
 class DTR(models.Model):
     dateTimeIn = models.DateTimeField( null = True, blank = True)
