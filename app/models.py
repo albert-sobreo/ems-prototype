@@ -64,6 +64,6 @@ class DTR(models.Model):
     date = models.DateField( null = True, blank = True)
     user = models.ForeignKey(User, related_name = "dtr", on_delete=models.PROTECT, null = True, blank = True)
 
-    rh = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    ot = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    ut = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rh = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    ot = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)
+    ut = models.DecimalField(max_digits=5, decimal_places=1, null=True, blank=True)

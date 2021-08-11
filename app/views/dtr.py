@@ -39,6 +39,86 @@ class DTRProcess(APIView):
         dtr.date = datetime.date.today()
         dtr.save()
     
+    # def timeOut(self, userID):
+    #     employee = User.objects.get(idUser=userID)
+    
+    #     dtr = employee.dtr.all().latest('pk')
+    #     dtr.dateTimeOut = datetime.datetime.now()
+    #     dtr.save()
+
+    #     rh = Decimal(0)
+    #     ut = Decimal(0)
+    #     ot = Decimal(0)
+        
+
+    #     tolerance = datetime.timedelta(minutes=5)
+
+    #     breakStart = datetime.datetime.combine(datetime.date.today(), datetime.time(12))
+    #     breakEnd = datetime.datetime.combine(datetime.date.today(), datetime.time(13))
+
+    #     scheduleTimeIn = datetime.datetime.combine(datetime.date.today(), employee.schedule.timeIn)
+    #     scheduleTimeOut = datetime.datetime.combine(datetime.date.today(), employee.schedule.timeOut)
+
+    #     durationSchedule = scheduleTimeOut - scheduleTimeIn - datetime.timedelta(hours=1) #timedelta
+    #     durationDTR = dtr.dateTimeOut - dtr.dateTimeIn #timedelta
+    #     durationDiff = abs(durationSchedule - durationDTR)
+        
+
+    #     timeInDiff = abs(scheduleTimeIn - dtr.dateTimeIn) #timedelta
+    #     timeOutDiff = abs(scheduleTimeOut - dtr.dateTimeOut) #timedelta
+
+    #     durationDTR = durationDTR - datetime.timedelta(hours=1) if dtr.dateTimeOut >= breakEnd and dtr.dateTimeIn <= breakStart else durationDTR
+
+    #     # EARLY OR ON TIME
+    #     if dtr.dateTimeIn <= scheduleTimeIn or timeInDiff < tolerance:
+    #         durationDTR = durationDTR - timeInDiff
+    #         timeInDiff = datetime.timedelta(0)
+        
+    #     # TIME IN ON TIME AND TIME OUT ON TIME
+    #     if timeInDiff < tolerance and timeOutDiff < tolerance:
+    #         rh = Decimal(8.0)
+        
+    #     # IF TIME IN ON TIME
+    #     print(timeInDiff, timeOutDiff, durationDTR, durationSchedule)
+        
+    #     # if timeInDiff == datetime.timedelta(0):
+    #     print(1)
+    #     # UNDERTIME TIME OUT
+    #     if timeOutDiff > tolerance:
+    #         if dtr.dateTimeOut < scheduleTimeOut:
+    #             print(2)
+    #             ut += Decimal(timeOutDiff.seconds/3600)
+    #             print(ut)
+    #     # OVERTIME TIME OUT
+    #         else:
+    #             ot += Decimal(timeOutDiff.seconds/3600)
+    #     # if timeOutDiff > tolerance and durationDTR > durationSchedule:
+    #     #     print(3)
+    #     #     
+    #     rh += Decimal(durationDTR.seconds/3600)
+    #     # IF TIME IN LATE
+    #     # else:
+    #     #     print(4)
+    #     #     # UNDERTIME TIME OUT
+    #     #     if durationDTR < durationSchedule and durationDiff > 2*tolerance:
+    #     #         print(5)
+    #     #         ut += Decimal(durationDiff.seconds/3600)
+    #     #     if durationDTR > durationSchedule and durationDiff > 2*tolerance:
+    #     #         print(6)
+    #     #         ot += Decimal(durationDiff.seconds/3600)
+    #     #     if durationDiff < 2*tolerance:
+    #     #         print(7)
+    #     #         rh = Decimal(8.0)
+    #     ut += Decimal(timeInDiff.seconds/3600)
+    #     print(ut)
+    #     rh = rh - ot
+    #     print(rh)
+
+    #     dtr.rh = rh
+    #     dtr.ut = ut
+    #     dtr.ot = ot
+    #     dtr.save()
+
     def timeOut(self, userID):
         employee = User.objects.get(idUser=userID)
     
@@ -67,52 +147,40 @@ class DTRProcess(APIView):
         timeInDiff = abs(scheduleTimeIn - dtr.dateTimeIn) #timedelta
         timeOutDiff = abs(scheduleTimeOut - dtr.dateTimeOut) #timedelta
 
+
         durationDTR = durationDTR - datetime.timedelta(hours=1) if dtr.dateTimeOut >= breakEnd and dtr.dateTimeIn <= breakStart else durationDTR
 
+
         # EARLY OR ON TIME
+        print('b0ss')
+        print(dtr.dateTimeIn <= scheduleTimeIn, timeInDiff < tolerance)
         if dtr.dateTimeIn <= scheduleTimeIn or timeInDiff < tolerance:
-            durationDTR = durationDTR - timeInDiff
             timeInDiff = datetime.timedelta(0)
-        
+
         # TIME IN ON TIME AND TIME OUT ON TIME
         if timeInDiff < tolerance and timeOutDiff < tolerance:
             rh = Decimal(8.0)
         
-        # IF TIME IN ON TIME
-        print(timeInDiff, timeOutDiff, durationDTR, durationSchedule)
-        
-        # if timeInDiff == datetime.timedelta(0):
-        print(1)
-        # UNDERTIME TIME OUT
+        print(timeOutDiff)
         if timeOutDiff > tolerance:
+            # UNDERTIME TIME OUT
             if dtr.dateTimeOut < scheduleTimeOut:
                 print(2)
                 ut += Decimal(timeOutDiff.seconds/3600)
                 print(ut)
-        # OVERTIME TIME OUT
+            # OVERTIME TIME OUT
             else:
                 ot += Decimal(timeOutDiff.seconds/3600)
-        # if timeOutDiff > tolerance and durationDTR > durationSchedule:
-        #     print(3)
-        #     
-        rh += Decimal(durationDTR.seconds/3600)
-        # IF TIME IN LATE
-        # else:
-        #     print(4)
-        #     # UNDERTIME TIME OUT
-        #     if durationDTR < durationSchedule and durationDiff > 2*tolerance:
-        #         print(5)
-        #         ut += Decimal(durationDiff.seconds/3600)
-        #     if durationDTR > durationSchedule and durationDiff > 2*tolerance:
-        #         print(6)
-        #         ot += Decimal(durationDiff.seconds/3600)
-        #     if durationDiff < 2*tolerance:
-        #         print(7)
-        #         rh = Decimal(8.0)
+
+            if timeInDiff != datetime.timedelta(0):
+                print('b0ss')
+                rh += Decimal(durationDTR.seconds/3600)
+                rh = rh - ot
+            else:
+                rh = Decimal(8.0)
+
+
         ut += Decimal(timeInDiff.seconds/3600)
-        print(ut)
-        rh = rh - ot
-        print(rh)
 
         dtr.rh = rh
         dtr.ut = ut
