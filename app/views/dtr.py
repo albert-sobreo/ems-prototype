@@ -130,8 +130,10 @@ class DTRProcess(APIView):
         ut = Decimal(0)
         ot = Decimal(0)
         
-
-        tolerance = datetime.timedelta(minutes=5)
+        tolerance = {
+            'default': datetime.timedelta(minutes=5),
+            'afterTimeOut': datetime.timedelta(minutes=30)
+        }
 
         breakStart = datetime.datetime.combine(datetime.date.today(), datetime.time(12))
         breakEnd = datetime.datetime.combine(datetime.date.today(), datetime.time(13))
@@ -139,48 +141,114 @@ class DTRProcess(APIView):
         scheduleTimeIn = datetime.datetime.combine(datetime.date.today(), employee.schedule.timeIn)
         scheduleTimeOut = datetime.datetime.combine(datetime.date.today(), employee.schedule.timeOut)
 
-        durationSchedule = scheduleTimeOut - scheduleTimeIn - datetime.timedelta(hours=1) #timedelta
-        durationDTR = dtr.dateTimeOut - dtr.dateTimeIn #timedelta
-        durationDiff = abs(durationSchedule - durationDTR)
+        # durationSchedule = scheduleTimeOut - scheduleTimeIn - datetime.timedelta(hours=1) #timedelta
+        
+        # durationDiff = abs(durationSchedule - durationDTR)
         
 
         timeInDiff = abs(scheduleTimeIn - dtr.dateTimeIn) #timedelta
         timeOutDiff = abs(scheduleTimeOut - dtr.dateTimeOut) #timedelta
 
-
-        durationDTR = durationDTR - datetime.timedelta(hours=1) if dtr.dateTimeOut >= breakEnd and dtr.dateTimeIn <= breakStart else durationDTR
-
-
         # EARLY OR ON TIME
-        print('b0ss')
-        print(dtr.dateTimeIn <= scheduleTimeIn, timeInDiff < tolerance)
-        if dtr.dateTimeIn <= scheduleTimeIn or timeInDiff < tolerance:
+        if dtr.dateTimeIn <= scheduleTimeIn or timeInDiff < tolerance['default']:
             timeInDiff = datetime.timedelta(0)
 
-        # TIME IN ON TIME AND TIME OUT ON TIME
-        if timeInDiff < tolerance and timeOutDiff < tolerance:
-            rh = Decimal(8.0)
-        
-        print(timeOutDiff)
-        if timeOutDiff > tolerance:
-            # UNDERTIME TIME OUT
-            if dtr.dateTimeOut < scheduleTimeOut:
-                print(2)
+        arrival = {
+            'onTime': timeInDiff < tolerance['default'],
+            'offTime': timeInDiff > tolerance['default'],
+        }
+
+        departure = {
+            "onTime": (timeOutDiff < tolerance['default'] and dtr.dateTimeOut < scheduleTimeOut) or (timeOutDiff < tolerance['afterTimeOut'] and dtr.dateTimeOut > scheduleTimeOut),
+            'offTime': (timeOutDiff > tolerance['default'] and dtr.dateTimeOut < scheduleTimeOut) or (timeOutDiff > tolerance['afterTimeOut'] and dtr.dateTimeOut > scheduleTimeOut),
+            'earlyDeparture': timeOutDiff > tolerance['default'] and dtr.dateTimeOut < scheduleTimeOut,
+            'lateDeparture': timeOutDiff > tolerance['afterTimeOut'] and dtr.dateTimeOut > scheduleTimeOut
+        }
+
+        # A FUNCTION TO DEDUCT BREAK FROM DURATION DTR
+        def deductBreak(time):
+            return time - datetime.timedelta(hours=1) if dtr.dateTimeOut >= breakEnd and dtr.dateTimeIn <= breakStart else time
+
+
+        # ACCURATE TIME IN TIME OUT COMPARISON
+        # BOTH ENDS ON-TIME
+        if arrival['onTime'] and departure['onTime']:
+            durationDTR = scheduleTimeOut - scheduleTimeIn
+            durationDTR = deductBreak(durationDTR)
+
+            rh += Decimal(durationDTR.seconds/3600)
+
+        # BOTH ENDS OFF-TIME
+        elif arrival['offTime'] and departure['offTime']:
+            durationDTR = dtr.dateTimeOut - dtr.dateTimeIn
+            durationDTR = deductBreak(durationDTR)
+
+            rh += Decimal(durationDTR.seconds/3600)
+
+            # EARLY DEPARTURE
+            if departure['earlyDeparture']:
                 ut += Decimal(timeOutDiff.seconds/3600)
-                print(ut)
-            # OVERTIME TIME OUT
-            else:
+
+            # LATE DEPARTURE
+            elif departure['lateDeparture']:
+                ot += Decimal(timeOutDiff.seconds/3600)
+            
+            # IF TIMEinDIFF HAS VALUE THEN WE KNOW IT'S LATE
+            ut += Decimal(timeInDiff.seconds/3600)
+
+            rh -=  ot
+
+        # ARRIVAL ON-TIME ONLY
+        elif arrival['onTime'] and departure['offTime']:
+            durationDTR = dtr.dateTimeOut - scheduleTimeIn
+            durationDTR = deductBreak(durationDTR)
+
+            rh += Decimal(durationDTR.seconds/3600)
+
+            # EARLY DEPARTURE
+            if departure['earlyDeparture']:
+                ut += Decimal(timeOutDiff.seconds/3600)
+
+            # LATE DEPARTURE
+            elif departure['lateDeparture']:
                 ot += Decimal(timeOutDiff.seconds/3600)
 
-            if timeInDiff != datetime.timedelta(0):
-                print('b0ss')
-                rh += Decimal(durationDTR.seconds/3600)
-                rh = rh - ot
-            else:
-                rh = Decimal(8.0)
+            rh -=  ot
+
+        # DEPARTURE ON-TIME ONLY
+        elif arrival['offTime'] and departure['onTime']:
+            durationDTR = scheduleTimeOut - dtr.dateTimeIn
+            durationDTR = deductBreak(durationDTR)
+
+            rh += Decimal(durationDTR.seconds/3600)
+
+            ut += Decimal(timeInDiff.seconds/3600)
+        
+        # IF NONE OF ABOVE APPLIES
+        else:
+            print('something happened')
 
 
-        ut += Decimal(timeInDiff.seconds/3600)
+        # # UNDERTIME TIME OUT
+        # if dtr.dateTimeOut < scheduleTimeOut and timeOutDiff > tolerance['default']:
+        #     ut += Decimal(timeOutDiff.seconds/3600)
+        #     if timeInDiff != datetime.timedelta(0):
+        #         rh += Decimal(durationDTR.seconds/3600)
+        #         print(rh, '1')
+        #         rh = rh - ot
+        #     else:
+        #         rh = Decimal(8.0)
+        # # OVERTIME TIME OUT
+        # elif dtr.dateTimeOut < scheduleTimeOut and timeOutDiff > tolerance['afterTimeOut']:
+        #     ot += Decimal(timeOutDiff.seconds/3600)
+        #     if timeInDiff != datetime.timedelta(0):
+        #         rh += Decimal(durationDTR.seconds/3600)
+
+        #         print(rh, '2')
+        #         rh = rh - ot
+        #     else:
+        #         rh = Decimal(8.0)
+        # ut += Decimal(timeInDiff.seconds/3600)
 
         dtr.rh = rh
         dtr.ut = ut
@@ -193,18 +261,11 @@ class DTRProcess(APIView):
         employee = User.objects.get(idUser = id)
         #try:   
         if employee.dtr.all().latest('pk').dateTimeOut == None:
-            if str(employee.dtr.all().latest('pk').date) == str(datetime.date.today()):
-                self.timeOut(id)
-                serializer = UserWithDTRSZ(employee)
-                x = serializer.data
-                x['dtr'] = serializer.data['dtr'][-1]
-                return Response(x)
-            else:
-                print('b0ss')
-                self.timeOut(id)
-                self.timeIn(id)
-                # sweetify.sweetalert(request, icon='warning', title='Warning!', text= 'Did not timeout yesterday! Uncertain Timeout recorded', persistent='Dismiss')
-                return JsonResponse({'message':1}, safe=False)
+            self.timeOut(id)
+            serializer = UserWithDTRSZ(employee)
+            x = serializer.data
+            x['dtr'] = serializer.data['dtr'][-1]
+            return Response(x)
         else:
             self.timeIn(id)
             serializer = UserWithDTRSZ(employee)
