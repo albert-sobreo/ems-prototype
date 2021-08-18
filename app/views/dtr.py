@@ -10,6 +10,7 @@ from ..serializers import *
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from decimal import Decimal
+from django.core import serializers
 
 import datetime
 
@@ -19,6 +20,28 @@ class DTRList(View):
             'User': User.objects.all()
         }
         return render(request, 'ems-dtr-list.html', context)
+
+
+class FetchUserDTR(APIView):
+    def get(self, request, format=None):
+        user = User.objects.get(pk=request.GET['id'])
+        startDate = request.GET['startDate']
+        endDate = request.GET['endDate']
+
+        try:
+            dtrList = user.dtr.all().filter(date__range=[startDate, endDate])
+        except:
+            return JsonResponse(1, safe=False)
+
+        # THIS BITCH CONTAINS OTHER STUFFS
+        serializedDtrList = serializers.serialize('python', dtrList)
+        
+        # FILTERS THE GOOD STUFFS
+        actualData = [d['fields'] for d in serializedDtrList]
+        
+        return JsonResponse (actualData, safe=False)
+
+
 
 class DTRView(View):
     def get(self, request, format=None):

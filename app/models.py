@@ -11,7 +11,7 @@ from django.db.models.deletion import PROTECT
 
 class Schedule(models.Model):
     timeIn = models.TimeField()
-    timeOut = models.TimeField()\
+    timeOut = models.TimeField()
         
     def __str__(self):
         return str(self.timeIn) + " - " + str(self.timeOut)

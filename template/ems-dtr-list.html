@@ -9,13 +9,15 @@
     </div>
 
     <div class="container">
-        <div>
-            <select @change = "getDTR(selectedUser)" v-model="selectedUser" class="form-control">
+        <div class="row">
+            <select @change = "getDTR(selectedUser)" v-model="selectedUser" class="form-control col mx-1">
                 <option value="" disabled selected>Select User</option>
                 {% for user in User %}
                 <option value="{{user.id}}">{{user.first_name}} {{user.last_name}}</option>
                 {% endfor %}
             </select>
+            <input @change = "getDTR(selectedUser)" v-model="startDate" type="date" class="form-control col mx-1">
+            <input @change = "getDTR(selectedUser)" v-model="endDate" type="date" class="form-control col mx-1">
         </div>
 
         <div class="my-3">
@@ -56,6 +58,8 @@
 
         data: {
             selectedUser: '',
+            startDate: '',
+            endDate: '',
             user: {
                 id: null,
                 first_name: null,
@@ -76,9 +80,17 @@
 
         methods:{
             getDTR(id){
-                axios.get(`/api/user-w-dtr/${id}/`)
+                axios.get(`/ems-user-w-dtr/`, {
+                    params: {
+                        id: id,
+                        startDate: this.startDate,
+                        endDate: this.endDate
+                    }
+                  })
                 .then(res=>{
-                    this.user = res.data
+                    if(res.data!=1){
+                        this.user.dtr = res.data
+                    }
                 })
             },
 
